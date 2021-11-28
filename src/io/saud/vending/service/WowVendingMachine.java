@@ -2,10 +2,12 @@ package io.saud.vending.service;
 
 import io.saud.vending.constants.MessageConstants;
 import io.saud.vending.model.ItemDTO;
+import io.saud.vending.model.TransactionDTO;
 import io.saud.vending.service.abstracts.VendingMachine;
 import io.saud.vending.service.impl.CompanyABillInserterImpl;
 import io.saud.vending.service.impl.CompanyBDisplayDeviceImpl;
 import io.saud.vending.service.impl.CompanyCCoinInserterImpl;
+import io.saud.vending.utils.TransactionLogUtils;
 
 import java.util.logging.Logger;
 
@@ -25,10 +27,10 @@ public class WowVendingMachine extends VendingMachine {
     //add item to the vending machine
     public void addItem(String code, ItemDTO item) {
         if (doesCodeExists(code)) {
-            log.severe("Item with code " + code + "already  exists for item" + itemMenuDTO.getCodeItemMapper().get(code).getName());
+            log.severe("Item with code " + code + "already  exists for item" + getCodeItemMapper().get(code).getName());
             return;
         }
-        itemMenuDTO.getCodeItemMapper().put(code.toUpperCase(), item);
+        getCodeItemMapper().put(code.toUpperCase(), item);
         log.info("Item " + item.getName() + " has been added with CODE: " + code);
     }
 
@@ -39,8 +41,8 @@ public class WowVendingMachine extends VendingMachine {
             log.severe("Item with code " + code + "does not exists! Please add the item first!");
             return;
         }
-        itemMenuDTO.getCodeItemMapper().get(code).updateStock(quantity);
-        log.info("Item " + itemMenuDTO.getCodeItemMapper().get(code).getName() + " Stock has been updated");
+        getCodeItemMapper().get(code).updateStock(quantity);
+        log.info("Item " + getCodeItemMapper().get(code).getName() + " Stock has been updated");
     }
 
     @Override
@@ -50,8 +52,8 @@ public class WowVendingMachine extends VendingMachine {
             log.severe("Item with code " + code + "does not exists! Please add the item first!");
             return;
         }
-        itemMenuDTO.getCodeItemMapper().get(code).setAmount(amount);
-        log.info("Item " + itemMenuDTO.getCodeItemMapper().get(code).getName() + " Price has been updated");
+        getCodeItemMapper().get(code).setAmount(amount);
+        log.info("Item " + getCodeItemMapper().get(code).getName() + " Price has been updated");
     }
 
     @Override
@@ -59,7 +61,7 @@ public class WowVendingMachine extends VendingMachine {
     public void placeOrder(String orderCode) {
         String userOrder = displayDevice.orderProduct(orderCode);
 
-        if (balance == 0D) {
+        if (getBalance() == 0D) {
             displayDevice.displayMessage("Sorry! You do not have sufficient credit \nPlease add more coins/cash");
             return;
         }
@@ -70,42 +72,43 @@ public class WowVendingMachine extends VendingMachine {
             return;
         }
 
-        if (balance < itemMenuDTO.getCodeItemMapper().get(userOrder).getAmount()) {
+        if (getBalance() < getCodeItemMapper().get(userOrder).getAmount()) {
             displayDevice.displayMessage("Sorry! You do not have sufficient credit \nPlease add more coins/cash");
             return;
         }
 
-        if (itemMenuDTO.getCodeItemMapper().get(userOrder).getStock() == 0) {
-            displayDevice.displayMessage("Sorry! " + itemMenuDTO.getCodeItemMapper().get(userOrder).getName() + "is out of stock");
+        if (getCodeItemMapper().get(userOrder).getStock() == 0) {
+            displayDevice.displayMessage("Sorry! " + getCodeItemMapper().get(userOrder).getName() + " is out of stock");
             return;
         }
 
-        displayDevice.displayMessage("Thank you for your order!\nPlease collect your " + itemMenuDTO.getCodeItemMapper().get(userOrder).getName());
-        if (itemMenuDTO.getCodeItemMapper().get(userOrder).getAmount() > balance) {
-            balance = balance - itemMenuDTO.getCodeItemMapper().get(userOrder).getAmount();
+        displayDevice.displayMessage("Thank you for your order!\nPlease collect your " + getCodeItemMapper().get(userOrder).getName());
+        if (getBalance() > getCodeItemMapper().get(userOrder).getAmount()) {
+            reduceBalance(getCodeItemMapper().get(userOrder).getAmount());
         }
-        refund(balance);
-        itemMenuDTO.getCodeItemMapper().get(userOrder).setStock(itemMenuDTO.getCodeItemMapper().get(userOrder).getStock() - 1);
+        TransactionLogUtils.logTransactions(new TransactionDTO(getCodeItemMapper().get(userOrder)));
+        refund(getBalance());
+        getCodeItemMapper().get(userOrder).setStock(getCodeItemMapper().get(userOrder).getStock() - 1);
     }
 
     @Override
     //add cash to balance
     public void loadCash(Double amount) {
-        balance += billInserter.getAmount(amount);
-        displayDevice.displayMessage("Your available balance is now " + amount);
+        addBalance(billInserter.getAmount(amount));
+        displayDevice.displayMessage("Your available balance is now " + getBalance());
     }
 
     @Override
     public void loadCoins(Double amount) {
-        balance += billInserter.getAmount(amount);
-        displayDevice.displayMessage("Your available balance is now " + amount);
+        addBalance(billInserter.getAmount(amount));
+        displayDevice.displayMessage("Your available balance is now " + getBalance());
     }
 
     @Override
     public void cancel() {
         log.info("Canceling the order!");
-        if (balance != 0D) {
-            refund(balance);
+        if (getBalance() != 0D) {
+            refund(getBalance());
             resetBalance();
         }
         displayDevice.displayMessage(String.format(MessageConstants.CANCEL_MESSAGE, MACHINE_NAME));
@@ -118,6 +121,6 @@ public class WowVendingMachine extends VendingMachine {
 
 
     private Boolean doesCodeExists(String code) {
-        return itemMenuDTO.getCodeItemMapper().containsKey(code);
+        return getCodeItemMapper().containsKey(code);
     }
 }

@@ -2,26 +2,22 @@ package io.saud.vending.utils;
 
 import io.saud.vending.model.TransactionDTO;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class CSVUtils {
+public class TransactionLogUtils {
     private static final String COMMA_DELIMITER = ",";
     private static final String NEW_LINE_SEPARATOR = "\n";
     private static final String FILE_HEADER = "id,item,amount,date";
     private static final String FILE_PATH = "transaction-logs/transactions-%s.csv";
 
-    private static Logger logger = Logger.getLogger(CSVUtils.class.getName());
+    private static Logger logger = Logger.getLogger(TransactionLogUtils.class.getName());
 
     public static void logTransactions(TransactionDTO dto) {
         FileWriter fileWriter = null;
@@ -56,15 +52,4 @@ public class CSVUtils {
         }
     }
 
-    public static void main(String[] args) {
-
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setId(UUID.randomUUID());
-        transactionDTO.setAmount(10D);
-        transactionDTO.setItem("TEST");
-        transactionDTO.setTransactionDate(LocalDateTime.now());
-        logTransactions(transactionDTO);
-        logTransactions(transactionDTO);
-        logTransactions(transactionDTO);
-    }
 }

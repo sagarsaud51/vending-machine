@@ -1,8 +1,8 @@
 package io.saud.vending.service.impl;
 
-import io.saud.vending.service.abstracts.CoinInserter;
+import io.saud.vending.service.abstracts.MoneyInserter;
 
-public class CompanyCCoinInserterImpl extends CoinInserter {
+public class CompanyCCoinInserterImpl extends MoneyInserter {
 
     //for exchange rate 1 = 1
     @Override

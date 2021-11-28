@@ -1,20 +1,24 @@
 package io.saud.vending.service.abstracts;
 
 import io.saud.vending.model.ItemDTO;
-import io.saud.vending.model.ItemMenuDTO;
 import io.saud.vending.service.DisplayDevice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class VendingMachine {
 
 
-    public final BillInserter billInserter;
-    public final CoinInserter coinInserter;
+    public final MoneyInserter billInserter;
+    public final MoneyInserter coinInserter;
     public final DisplayDevice displayDevice;
     public String machineName = "";
-    public Double balance = 0D;
-    public ItemMenuDTO itemMenuDTO = new ItemMenuDTO();
+    private Double balance = 0D;
 
-    public VendingMachine(BillInserter billInserter, CoinInserter coinInserter, DisplayDevice displayDevice) {
+
+    private final Map<String, ItemDTO> codeItemMapper = new HashMap<>();
+
+    public VendingMachine(MoneyInserter billInserter, MoneyInserter coinInserter, DisplayDevice displayDevice) {
         this.billInserter = billInserter;
         this.coinInserter = coinInserter;
         this.displayDevice = displayDevice;
@@ -43,4 +47,18 @@ public abstract class VendingMachine {
         this.coinInserter.resetBalance();
     }
 
+    public Map<String, ItemDTO> getCodeItemMapper() {
+        return codeItemMapper;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void addBalance(Double balance) {
+        this.balance += balance;
+    }
+    public void reduceBalance(Double balance) {
+        this.balance -= balance;
+    }
 }

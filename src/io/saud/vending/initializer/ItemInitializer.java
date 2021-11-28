@@ -1,4 +1,4 @@
-package io.saud.vending.helper;
+package io.saud.vending.initializer;
 
 import io.saud.vending.model.ItemDTO;
 import io.saud.vending.service.abstracts.VendingMachine;

@@ -3,7 +3,7 @@ package io.saud.vending.service.abstracts;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BillInserter {
+public abstract class MoneyInserter {
 
     public  Double balance = 0D;
     public  Map<Double,Integer> denoCount = new HashMap<>();

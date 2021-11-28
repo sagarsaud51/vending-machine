@@ -2,7 +2,7 @@ package io.saud.vending.service;
 
 import io.saud.vending.constants.MessageConstants;
 import io.saud.vending.exception.VendingMachineException;
-import io.saud.vending.helper.ItemInitializer;
+import io.saud.vending.initializer.ItemInitializer;
 import io.saud.vending.service.abstracts.VendingMachine;
 
 import java.util.Scanner;
@@ -46,7 +46,11 @@ public class VendingProcessor {
                         vendingMachine.cancel();
                         break;
                     case "5":
+                        if (vendingMachine.getBalance() > 0) {
+                            vendingMachine.cancel();
+                        }
                         exit = true;
+                        terminateVendingMachine();
                     default:
                         vendingMachine.displayDevice.displayMessage("Please enter a valid option");
                         break;
@@ -82,10 +86,10 @@ public class VendingProcessor {
         final StringBuilder[] priceMenu = {new StringBuilder("      ")};
         final StringBuilder[] codeMenu = {new StringBuilder("       ")};
         final int[] i = {0};
-        vendingMachine.itemMenuDTO.getCodeItemMapper().keySet().forEach(item -> {
-            itemMenu[0].append(vendingMachine.itemMenuDTO.getCodeItemMapper().get(item).getName()).append("       ");
-            qtyMenu[0].append("   ").append(vendingMachine.itemMenuDTO.getCodeItemMapper().get(item).getStock()).append("       ");
-            priceMenu[0].append(" ").append(vendingMachine.itemMenuDTO.getCodeItemMapper().get(item).getAmount().toString()).append("      ");
+        vendingMachine.getCodeItemMapper().keySet().forEach(item -> {
+            itemMenu[0].append(vendingMachine.getCodeItemMapper().get(item).getName()).append("       ");
+            qtyMenu[0].append("   ").append(vendingMachine.getCodeItemMapper().get(item).getStock()).append("       ");
+            priceMenu[0].append(" ").append(vendingMachine.getCodeItemMapper().get(item).getAmount().toString()).append("      ");
             codeMenu[0].append(" ").append(item).append("       ");
             i[0]++;
             if (i[0] % 3 == 0) {
@@ -100,8 +104,8 @@ public class VendingProcessor {
                 codeMenu[0] = new StringBuilder("       ");
             }
         });
-        if (vendingMachine.balance > 0) {
-            vendingMachine.displayDevice.displayMessage("Balance:" + vendingMachine.balance);
+        if (vendingMachine.getBalance() > 0) {
+            vendingMachine.displayDevice.displayMessage("Balance:" + vendingMachine.getBalance());
         }
 
         vendingMachine.displayDevice.displayMessage("Press (1) to add cash (2) to add coins (3) to Place order (4) to refund (5) to terminate");
@@ -111,5 +115,19 @@ public class VendingProcessor {
     private Double validateAmount(double amount) {
         if (amount > 0) return amount;
         else throw new VendingMachineException("Invalid amount");
+    }
+
+    private void terminateVendingMachine(){
+        System.out.print("Terminating Vending Machine");
+        for (int i = 0; i < 5; i++) {
+            System.out.print(".");
+            try {
+                Thread.sleep(1000);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+        System.out.println("\nVending Machine Terminated");
+        System.exit(-1);
     }
 }
